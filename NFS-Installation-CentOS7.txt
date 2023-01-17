@@ -1,0 +1,122 @@
+------------------------------------------------------------------------
+Create 2 VM name1=master  name2=client with NAT MOde
+------------------------------------------------------------------------
+Do Every Step one bye one On Both Master & Client
+------------------------------------------------------------------------
+
+--------------------
+On Server- (Master)
+--------------------
+
+-------
+Step=1
+-------
+
+[root@master]# hostnamectl set-hostname master
+[root@master]# vi /etc/hosts
+                     add Master ip & name
+                     add Client ip & name
+                     ------------------------
+                eg:-  192.168.111.129 master
+                      192.168.111.129 client
+                     -------------------------
+                      Save file
+
+[root@master]# ping client
+[root@master]# ssh-keygen
+               Press 3 time Enter
+
+[root@master]#ssh-copy-id root@client
+[root@master]# ssh client 
+               Login & exit for client user
+
+---------------------------------------------------------------------
+
+-------
+Step=2
+-------
+
+[root@master]# mkdir home1
+[root@master]# yum install nfs-utils
+[root@master]# systemctl stop firewalld
+[root@master]# setenforce 0
+[root@master]# systemctl start nfs-server.service
+[root@master]# systemctl status nfs-server.service
+[root@master]# vi /etc/exports
+               Add this line in the file
+               ----------------------------------------
+                /root/home1/ *(rw,sync,no_root_squash)
+               ----------------------------------------
+                Save file
+
+[root@master ~]# systemctl restart nfs-server.service 
+[root@master]# exportfs -arv
+
+----------------------------------------------------------------------------
+
+-------
+Step=3
+-------
+[root@master]# cd home1
+[root@master]# touch file
+
+==============================================================================
+
+--------------------
+On Client- (Client)
+--------------------
+
+-------
+Step=1
+-------
+
+[root@client]# hostnamectl set-hostname client
+[root@client]# vi /etc/hosts
+                     add Master ip & name
+                     add Client ip & name
+                     ------------------------
+                eg:-  192.168.111.129 master
+                      192.168.111.129 client
+                     -------------------------
+                      Save file
+
+[root@client]# ping master
+[root@client]# ssh-keygen
+               Press 3 time Enter
+
+[root@client]# ssh-copy-id root@client
+[root@client]# ssh master 
+               Login & exit for master user
+
+-----------------------------------------------------------------------------
+
+-------
+Step=2
+-------
+
+[root@client]# mkdir home1
+[root@client]# yum install nfs-utils
+[root@client]# systemctl stop firewalld
+[root@client]# setenforce 0
+[root@client]# showmount -e master
+[root@client]# mount -t nfs master:/root/home1 /root/home1
+[root@client]# df -Th
+
+-----------------------------------------------------------------------------
+
+-------
+Step=3
+-------
+
+
+[root@client ~]# cd /root/home1/
+[root@client ~]# ls
+[root@master]# cat > file
+               -------------------
+               welcome to master 
+               -------------------
+               save file
+
+
+
+
